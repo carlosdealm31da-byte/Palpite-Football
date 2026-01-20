@@ -1,45 +1,56 @@
 import streamlit as st
-from scipy.stats import poisson
 
-st.set_page_config(page_title="Beto AI - Meta 50M", page_icon="📈")
-st.title("📈 Beto AI: Estrategista de Meta")
+st.set_page_config(page_title="Beto AI - Elephant Bet Edition", page_icon="🐘")
+st.title("🐘 Beto AI: Consultor Elephant Bet Angola")
 
 st.markdown("""
-*Lógica da Banca: Valores baixos indicam maior força e favoritismo.*
-""")
+<style>
+    .main { background-color: #f0f2f6; }
+    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #ff4b4b; color: white; }
+</style>
+""", unsafe_allow_html=True)
+
+st.info("🎯 Estratégia focada para mercados da Elephant Bet")
 
 col1, col2 = st.columns(2)
 with col1:
-    home_team = st.text_input("Equipe Casa", "Kairat")
-    home_score = st.number_input(f"Índice de Força {home_team}", min_value=0.1, value=1.2, step=0.1)
-with col2:
-    away_team = st.text_input("Equipe Fora", "Club Brugge")
-    away_score = st.number_input(f"Índice de Força {away_team}", min_value=0.1, value=2.5, step=0.1)
-
-if st.button("ANALISAR META E SUGERIR CÓDIGO"):
-    # Invertendo a lógica para o cálculo: menor índice = maior média de sucesso
-    mu_home = 3 / home_score 
-    mu_away = 3 / away_score
-
-    prob_home, prob_away, prob_draw = 0, 0, 0
-    for i in range(10):
-        for j in range(10):
-            p = poisson.pmf(i, mu_home) * poisson.pmf(j, mu_away)
-            if i > j: prob_home += p
-            elif i < j: prob_away += p
-            else: prob_draw += p
-
-    st.markdown("---")
+    home_team = st.text_input("Equipa da Casa", "Petro de Luanda")
+    home_odd = st.number_input(f"Odd na Elephant ({home_team})", value=1.80, step=0.01)
     
-    # Diagnóstico Baseado na Meta
-    if prob_home > prob_away and home_score < away_score:
-        st.success(f"🎯 **CÓDIGO SUGERIDO:** Casa (1) ou Handicap 0")
-        st.write(f"Análise: {home_team} tem o índice menor, logo maior probabilidade de bater a meta.")
-    elif prob_away > prob_home and away_score < home_score:
-        st.success(f"🎯 **CÓDIGO SUGERIDO:** Fora (2) ou Handicap 0")
-        st.write(f"Análise: {away_team} é o favorito técnico pela pontuação da banca.")
-    else:
-        st.warning("⚠️ **CÓDIGO SUGERIDO:** Dupla Hipótese (1X ou X2)")
-        st.write("Análise: Os índices estão equilibrados. Não arrisque vitória direta.")
+with col2:
+    away_team = st.text_input("Equipa de Fora", "1º de Agosto")
+    away_odd = st.number_input(f"Odd na Elephant ({away_team})", value=3.20, step=0.01)
 
-    st.info(f"Probabilidade de Sucesso da Meta: {max(prob_home, prob_away)*100:.1f}%")
+if st.button("GERAR CÓDIGO ELEPHANT BET"):
+    st.markdown("---")
+    st.subheader("📋 BILHETE SUGERIDO (CÓDIGOS ANGOLA)")
+    
+    # Lógica de decisão baseada no padrão Elephant Bet
+    if home_odd < 1.55:
+        mercado = "Vencedor (1X2)"
+        codigo_sugerido = f"Casa (1)"
+        explicacao = f"A {home_team} é super favorita na Elephant Bet."
+    elif away_odd < 1.55:
+        mercado = "Vencedor (1X2)"
+        codigo_sugerido = f"Fora (2)"
+        explicacao = f"A {away_team} é super favorita na Elephant Bet."
+    elif home_odd < 2.30 and away_odd < 2.30:
+        mercado = "Ambas Equipas Marcam"
+        codigo_sugerido = "Sim (BTTS)"
+        explicacao = "Jogo equilibrado na nossa banda. Expectativa de golos de ambos lados."
+    elif home_odd < 2.10:
+        mercado = "Dupla Possibilidade"
+        codigo_sugerido = "1X (Casa ou Empate)"
+        explicacao = "Mais segurança para a tua caminhada dos 50M."
+    else:
+        mercado = "Total de Golos"
+        codigo_sugerido = "Mais de 1.5"
+        explicacao = "Mercado de segurança para evitar surpresas no vencedor."
+
+    # Layout estilo bilhete de aposta
+    st.success(f"📌 **MERCADO:** {mercado}")
+    st.warning(f"🔢 **CÓDIGO NA ELEPHANT:** {codigo_sugerido}")
+    st.write(f"💡 **PORQUÊ?** {explicacao}")
+    
+    st.markdown("---")
+    st.write("📢 *Dica: Verifica sempre se a Elephant Bet não alterou a Odd antes de confirmares o teu bilhete.*")
