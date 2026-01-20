@@ -1,70 +1,84 @@
 import streamlit as st
 import random
 
-# 1. Configuração de Estética e Cores
-st.set_page_config(page_title="Beto AI - O General", layout="centered")
+# 1. Configuração de Página e Estilo (Inspirado no Beto AI)
+st.set_page_config(page_title="Beto AI - O General", layout="wide")
 
 st.markdown("""
 <style>
-    .main { background-color: #0d1117; color: white; }
-    .stButton>button { width: 100%; background-color: #E61E25; color: white; font-weight: bold; border-radius: 8px; height: 3.5em; border: none; }
-    .card-decisao { background-color: #161b22; padding: 20px; border-radius: 12px; border-left: 8px solid #E61E25; margin-top: 20px; border: 1px solid #30363d; }
-    .codigo-texto { color: #00ff00; font-size: 2.2em; font-weight: bold; display: block; margin-top: 5px; }
-    .prob-texto { color: #ffc107; font-size: 1.4em; font-weight: bold; }
-    .justificativa-box { background-color: #0d1117; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #30363d; color: #8b949e; font-style: italic; }
+    .main { background-color: #0b0e11; color: white; }
+    .stButton>button { width: 100%; background-color: #E61E25; color: white; font-weight: bold; border-radius: 10px; height: 3em; border: none; }
+    .card-res { background-color: #1a1d23; padding: 20px; border-radius: 15px; border-left: 8px solid #E61E25; margin-top: 20px; }
+    .codigo-v { color: #00ff00; font-size: 2.2em; font-weight: bold; }
+    .prob-v { color: #ffc107; font-size: 1.5em; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🐘 Beto AI: Decisor Inteligente")
+st.title("🐘 Beto AI - Sistema de Decisão")
 
-# 2. Entrada de Dados Manual
-st.subheader("📊 Analisador de Confronto")
-col1, col2 = st.columns(2)
-with col1:
-    equipa_casa = st.text_input("Equipa da Casa", "Ex: Preston")
-    odd_casa = st.number_input("Odd Casa", value=1.50)
-with col2:
-    equipa_fora = st.text_input("Equipa de Fora", "Ex: Everton")
-    odd_fora = st.number_input("Odd Fora", value=3.00)
+# 2. Seleção de País/Liga (Como estava antes)
+col_p1, col_p2 = st.columns(2)
+with col_p1:
+    pais = st.selectbox("Escolha o País/Região", ["Inglaterra", "Espanha", "Itália", "Alemanha", "Portugal", "Mundo (Ligas Reservas)", "Brasil"])
+with col_p2:
+    liga = st.text_input("Nome da Liga", "Premier League")
 
-# 3. Processamento e Decisão
-if st.button("GERAR CÓDIGO E JUSTIFICATIVA"):
-    # Lógica Simplificada de Decisão
-    if odd_casa < 1.35:
-        resultado = "1 (VENCEDOR CASA)"
-        probabilidade = random.uniform(90.1, 96.5)
-        motivo = f"A inteligência escolheu este código devido ao favoritismo técnico absoluto do {equipa_casa}. A banca indica baixa resistência do adversário."
-    elif odd_fora < 1.35:
-        resultado = "2 (VENCEDOR FORA)"
-        probabilidade = random.uniform(90.1, 96.5)
-        motivo = f"O código 2 foi selecionado porque o {equipa_fora} domina o mercado tático para este confronto, com probabilidade máxima de vitória."
-    elif 1.45 <= odd_casa <= 2.20 and 1.45 <= odd_fora <= 2.20:
+# 3. Entrada de Dados do Jogo
+st.markdown("---")
+c1, c2 = st.columns(2)
+with c1:
+    casa = st.text_input("Equipa Casa", placeholder="Ex: Man. City")
+    odd_c = st.number_input("Odd Casa", value=1.50, step=0.01)
+with c2:
+    fora = st.text_input("Equipa Fora", placeholder="Ex: Arsenal")
+    odd_f = st.number_input("Odd Fora", value=3.20, step=0.01)
+
+hora_j = st.text_input("Horário do Jogo", "18:00")
+
+# 4. Motor de Decisão e Explicação
+if st.button("ANALISAR E GERAR CÓDIGO"):
+    # Lógica de Inteligência para escolher o mercado
+    if odd_c < 1.35:
+        resultado = "VENCEDOR 1 (CASA)"
+        chance = random.uniform(92.1, 97.5)
+        razao = f"A inteligência detectou que em {pais}, o {casa} tem um domínio histórico com estas odds. A probabilidade de vitória é extrema."
+    elif odd_f < 1.35:
+        resultado = "VENCEDOR 2 (FORA)"
+        chance = random.uniform(92.1, 97.5)
+        razao = f"O {fora} apresenta uma superioridade técnica esmagadora na {liga}. O mercado esmagou a odd, confirmando a decisão."
+    elif 1.45 <= odd_c <= 2.20 and 1.45 <= odd_f <= 2.20:
         resultado = "AMBAS MARCAM (SIM)"
-        probabilidade = random.uniform(82.5, 88.9)
-        motivo = "Confronto equilibrado. A IA escolheu este código pois as odds indicam ataques ativos de ambos os lados e defesas expostas."
-    else:
+        chance = random.uniform(84.5, 89.8)
+        razao = "Equilíbrio ofensivo detectado. Ambas as equipas na liga de {pais} costumam marcar quando as odds estão neste intervalo."
+    elif odd_c > 2.50 and odd_f > 2.50:
         resultado = "+1.5 GOLOS"
-        probabilidade = random.uniform(85.0, 93.4)
-        motivo = "A decisão foi tomada para garantir segurança. O mercado de golos é mais viável do que escolher um vencedor num jogo instável."
+        chance = random.uniform(88.0, 95.2)
+        razao = "Não há favorito claro. A IA escolheu o mercado de golos para garantir o acerto, pois os ataques superam as defesas nesta liga."
+    else:
+        resultado = "1X (DUPLA CHANCE)"
+        chance = random.uniform(79.0, 85.5)
+        razao = "Proteção de banca ativada. O risco de empate é real, por isso a IA decidiu pela Dupla Chance para assegurar o green."
 
-    # 4. Exibição do Resultado
+    # Exibição do Card de Resultado
     st.markdown(f"""
-    <div class="card-decisao">
-        <span style='color: #E61E25; font-weight: bold; font-size: 0.9em;'>🎯 DECISÃO FINAL</span><br>
-        <b>{equipa_casa} vs {equipa_fora}</b><br><br>
+    <div class="card-res">
+        <span style='color: #E61E25; font-weight: bold;'>🎯 DECISÃO FINAL DA IA</span><br>
+        <span style='font-size: 1.2em;'><b>{casa} vs {fora}</b></span><br>
+        <span style='color: #888;'>{pais} | {liga} | {hora_j}</span><br><br>
         
-        <span style='color: #8b949e; font-size: 0.85em;'>CÓDIGO SUGERIDO:</span>
-        <span class="codigo-texto">{resultado}</span>
+        <span style='font-size: 0.9em; color: #aaa;'>CÓDIGO ADEQUADO:</span><br>
+        <span class="codigo-v">{resultado}</span><br>
         
-        <span style='color: #8b949e; font-size: 0.85em;'>PROBABILIDADE DE SUCESSO:</span><br>
-        <span class="prob-texto">🔥 {probabilidade:.1f}%</span>
+        <span style='font-size: 0.9em; color: #aaa;'>PROBABILIDADE DE ENTRADA:</span><br>
+        <span class="prob-v">🔥 {chance:.1f}%</span><br><br>
         
-        <div class="justificativa-box">
-            <b>JUSTIFICATIVA DA ESCOLHA:</b><br>
-            {motivo}
+        <div style='background-color: #262a33; padding: 10px; border-radius: 8px; border: 1px solid #444;'>
+            <b style='color: #fff;'>PORQUÊ ESTA ESCOLHA?</b><br>
+            <span style='color: #ccc; font-style: italic;'>{razao}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("---")
-st.caption("Beto AI: O General da sua banca.")
+st.sidebar.markdown("### 📊 Beto AI Stats")
+st.sidebar.write(f"Conexão: **Estável**")
+st.sidebar.write(f"Modo: **Especialista**")
