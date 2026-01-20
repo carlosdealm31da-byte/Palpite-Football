@@ -1,41 +1,52 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 from scipy.stats import poisson
 
-# Configuração visual para celular
-st.set_page_config(page_title="Beto AI - 50 Milhões", page_icon="⚽")
+st.set_page_config(page_title="Beto AI - Estratégia 50M", page_icon="⚽")
 
 st.title("⚽ Beto AI: O Caminho dos 50 Milhões")
 st.markdown("---")
 
-# Motor de Cálculo Matemático
-def calcular_previsao(media_casa, media_fora):
-    prob_vitoria_casa = np.sum(np.triu(np.outer(
-        poisson.pmf(range(6), media_casa), 
-        poisson.pmf(range(6), media_fora)), 1))
+# Entradas de dados
+col1, col2 = st.columns(2)
+with col1:
+    home_team = st.text_input("Time da Casa", "Kairat")
+    home_mu = st.number_input(f"Média de Gols: {home_team}", min_value=0.0, value=1.49, step=0.1)
+
+with col2:
+    away_team = st.text_input("Time de Fora", "Club Brugge")
+    away_mu = st.number_input(f"Média de Gols: {away_team}", min_value=0.0, value=1.0, step=0.1)
+
+if st.button("GERAR DIAGNÓSTICO REALISTA"):
+    # Cálculo de Probabilidades usando Poisson
+    prob_home = 0
+    prob_away = 0
+    prob_draw = 0
     
-    odd_justa = 1 / prob_vitoria_casa if prob_vitoria_casa > 0 else 0
-    return prob_vitoria_casa, odd_justa
+    for i in range(10): # Gols do time da casa
+        for j in range(10): # Gols do time de fora
+            p = poisson.pmf(i, home_mu) * poisson.pmf(j, away_mu)
+            if i > j:
+                prob_home += p
+            elif i < j:
+                prob_away += p
+            else:
+                prob_draw += p
 
-# Interface do Aplicativo
-st.header("Analisar Novo Jogo")
-time_casa = st.text_input("Time da Casa", "Ex: Flamengo")
-time_fora = st.text_input("Time de Fora", "Ex: Vasco")
+    # Exibição dos Resultados
+    st.subheader("📊 Probabilidades Reais")
+    c1, c2, c3 = st.columns(3)
+    c1.metric(home_team, f"{prob_home*100:.1f}%")
+    c2.metric("Empate", f"{prob_draw*100:.1f}%")
+    c3.metric(away_team, f"{prob_away*100:.1f}%")
 
-col_a, col_b = st.columns(2)
-with col_a:
-    g_casa = st.number_input(f"Média Gols {time_casa}", value=1.5)
-with col_b:
-    g_fora = st.number_input(f"Média Gols {time_fora}", value=1.0)
-
-if st.button("CALCULAR PROBABILIDADE"):
-    prob, odd = calcular_previsao(g_casa, g_fora)
+    st.markdown("---")
     
-    st.metric("Chance de Vitória", f"{prob:.1%}")
-    st.metric("Odd Justa (Mínima)", f"{odd:.2f}")
-    
-    st.success(f"DICA: Só aposte se a odd da casa for MAIOR que {odd:.2f}")
+    # Cálculo das Odds Justas
+    odd_h = 1/prob_home if prob_home > 0 else 100
+    odd_d = 1/prob_draw if prob_draw > 0 else 100
+    odd_a = 1/prob_away if prob_away > 0 else 100
 
-st.markdown("---")
-st.caption("Use com responsabilidade. Rumo aos 50 milhões!")
+    st.subheader("💰 Tabela de Odds Justas (Mínimas)")
+    st.write(f"**{home_team}:** {odd_h:.2f} | **Empate:** {odd_d:.2f} | **{away_team}:** {odd_a:.2f}")
+    
+    st.success(f"💡 DICA: Só aposte se a banca pagar MAIS do que os valores acima!")
