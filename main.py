@@ -3,125 +3,101 @@ import random
 from datetime import datetime, time
 import pytz
 
-# Configuração de Fuso Horário (Angola/Luanda)
+# Configuração de Fuso Horário
 angola_tz = pytz.timezone('Africa/Luanda')
 agora = datetime.now(angola_tz)
 
-st.set_page_config(page_title="Beto AI - Especialista Tático", page_icon="🎯", layout="wide")
+st.set_page_config(page_title="Beto AI - Risco & Estratégia", layout="wide")
 
-# Estilo Visual Profissional e Limpo
+# Estilo Dark Pro (Foco em Resultados)
 st.markdown("""
 <style>
-    .main { background-color: #0d1117; color: white; }
-    .stButton>button { width: 100%; background-color: #238636; color: white; font-weight: bold; border-radius: 8px; height: 3.5em; border: none; }
-    .card-analise { background-color: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 20px; border-left: 8px solid #238636; }
-    .label-equipa { color: #8b949e; font-size: 0.8em; text-transform: uppercase; }
-    .nome-equipa { color: #ffffff; font-size: 1.1em; font-weight: bold; }
-    .codigo-res { color: #39d353; font-size: 1.8em; font-weight: bold; display: block; margin: 5px 0; }
-    .percent { color: #f1e05a; font-size: 1.2em; font-weight: bold; }
-    .tag-utilidade { background-color: #238636; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; }
+    .main { background-color: #0b0e11; color: white; }
+    .stButton>button { width: 100%; background-color: #E61E25; color: white; font-weight: bold; border-radius: 8px; height: 3.5em; border: none; }
+    .card-analise { background-color: #1a1d23; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 20px; border-left: 8px solid #E61E25; }
+    .tag-risco { background-color: #ffc107; color: black; padding: 3px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; }
+    .tag-ganho { background-color: #238636; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; }
+    .codigo-v { color: #00ff00; font-size: 1.8em; font-weight: bold; display: block; margin: 5px 0; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎯 Beto AI: Decisor Tático Manual")
-st.write(f"🕒 Hora Atual em Luanda: **{agora.strftime('%H:%M')}**")
+st.title("🎯 Beto AI: Estratégia de Alavancagem")
+st.write(f"🕒 Luanda: **{agora.strftime('%H:%M')}** | Foco: **Maximização de Prémio**")
 
-# --- CONFIGURAÇÃO GLOBAL (PARA POUPAR TEMPO) ---
-st.sidebar.header("⚙️ Configuração Rápida")
-horario_padrao = st.sidebar.time_input("Horário Padrão para os jogos", value=time(16, 0))
+# --- CONFIGURAÇÃO DE SESSÃO ---
+st.sidebar.header("⚙️ Painel de Comando")
 num_jogos = st.sidebar.number_input("Quantidade de Jogos", min_value=1, max_value=50, value=1)
+horario_global = st.sidebar.time_input("Horário Padrão", value=time(18, 0))
 
 jogos_lista = []
 
-# --- ENTRADA DE DADOS ---
-st.subheader("📝 Preenchimento dos Confrontos")
-cols_input = st.columns(2)
-
+# --- ENTRADA DE DADOS MANUAL ---
+st.subheader("📝 Lista de Confrontos")
 for i in range(num_jogos):
-    with st.expander(f"Jogo #{i+1} - Configurar", expanded=(i < 2)):
+    with st.expander(f"Jogo #{i+1}", expanded=(i == 0)):
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
-            casa = st.text_input(f"Casa #{i+1}", key=f"c_{i}")
+            casa = st.text_input(f"Equipa Casa #{i+1}", key=f"c_{i}")
             odd_c = st.number_input(f"Odd Casa #{i+1}", value=1.50, key=f"oc_{i}")
         with c2:
-            fora = st.text_input(f"Fora #{i+1}", key=f"f_{i}")
+            fora = st.text_input(f"Equipa Fora #{i+1}", key=f"f_{i}")
             odd_f = st.number_input(f"Odd Fora #{i+1}", value=2.50, key=f"of_{i}")
         with c3:
-            # O utilizador pode usar o padrão ou mudar apenas este
-            hora_individual = st.time_input(f"Hora #{i+1}", value=horario_padrao, key=f"h_{i}")
+            hora = st.time_input(f"Hora #{i+1}", value=horario_global, key=f"h_{i}")
         
-        jogos_lista.append({
-            'casa': casa, 'fora': fora, 'odd_c': odd_c, 'odd_f': odd_f, 'hora': hora_individual
-        })
+        jogos_lista.append({'casa': casa, 'fora': fora, 'odd_c': odd_c, 'odd_f': odd_f, 'hora': hora})
 
-# --- PROCESSAMENTO COM LOGICA DE UTILIDADE ---
-if st.button("ANALISAR E DECIDIR TODOS"):
+# --- PROCESSAMENTO COM LÓGICA DE ALTO GANHO ---
+if st.button("GERAR CÓDIGOS ESTRATÉGICOS"):
     st.markdown("---")
     
     for i, jogo in enumerate(jogos_lista):
-        if not jogo['casa'] or not jogo['fora']:
-            continue
-            
-        # Validar se o jogo ainda é possível (tempo)
-        hora_limite = datetime.combine(agora.date(), jogo['hora'])
-        hora_limite = angola_tz.localize(hora_limite)
+        if not jogo['casa'] or not jogo['fora']: continue
         
-        if hora_limite < agora:
-            st.warning(f"⚠️ Jogo #{i+1}: O horário {jogo['hora'].strftime('%H:%M')} já passou. Análise cancelada para evitar erro.")
-            continue
-
-        # LÓGICA DE UTILIDADE TÁTICA (A IA decide o valor do jogo)
         oc = jogo['odd_c']
         of = jogo['odd_f']
         
-        # Cenário 1: Super Favorito (Utilidade de Segurança)
-        if oc < 1.30 or of < 1.30:
-            tipo_utilidade = "SEGURANÇA MÁXIMA"
-            codigo = "VENCEDOR (SECO)" if oc < 1.30 else "VENCEDOR 2 (SECO)"
-            prob = random.uniform(94.0, 98.5)
-            porque = "A IA identificou um desequilíbrio técnico total. A utilidade aqui é garantir o green com baixa exposição ao risco."
+        # MOTOR DE DECISÃO DE RISCO (Busca de Odds Altas para chegar aos 50M)
+        # Cenário A: Favorito claro -> Buscar Handicap para subir a Odd
+        if oc < 1.40 or of < 1.40:
+            status = "ALAVANCAGEM"
+            fav = jogo['casa'] if oc < 1.40 else jogo['fora']
+            codigo = f"HANDICAP (-1.5) {fav}"
+            prob = random.uniform(70.0, 78.5)
+            porque = "A odd seca é muito baixa para quem quer 50M. A IA sugere o Handicap para dobrar o valor, apostando numa vitória por 2 ou mais golos."
         
-        # Cenário 2: Equilíbrio de Ataque (Utilidade de Golos)
-        elif 1.50 <= oc <= 2.10 and 1.50 <= of <= 2.10:
-            tipo_utilidade = "EFICIÊNCIA OFENSIVA"
-            codigo = "AMBAS MARCAM (SIM)"
-            prob = random.uniform(86.0, 91.5)
-            porque = "Ambas as equipas têm odds que sugerem ataques produtivos. A utilidade deste código supera a de vencedor pelo equilíbrio do jogo."
+        # Cenário B: Jogo Equilibrado -> Buscar Resultado Exato ou Ambas Marcam + Total
+        elif 1.80 <= oc <= 2.50 and 1.80 <= of <= 2.50:
+            status = "ALTO RISCO / ALTO GANHO"
+            codigo = "AMBAS MARCAM & +2.5 GOLOS"
+            prob = random.uniform(65.0, 72.0)
+            porque = "Confronto equilibrado onde a utilidade está nos golos. Esta combinação eleva a Odd final exponencialmente para acelerar a meta de ganho."
             
-        # Cenário 3: Jogo Trancado / Risco (Utilidade de Proteção)
-        elif oc > 2.20 and of > 2.20:
-            tipo_utilidade = "PROTEÇÃO DE BANCA"
-            codigo = "MAIS DE 1.5 GOLOS"
-            prob = random.uniform(89.0, 94.0)
-            porque = "Jogo sem dono claro. A IA decide pela utilidade dos golos, protegendo o teu capital contra empates em 0-0 ou 1-1."
-            
+        # Cenário C: Odds Altas em ambos -> Buscar Intervalo/Final ou Resultado Seco
         else:
-            tipo_utilidade = "DUPLA CHANCE"
-            codigo = "1X (CASA OU EMPATE)" if oc < of else "X2 (FORA OU EMPATE)"
-            prob = random.uniform(82.0, 88.0)
-            porque = "Análise de utilidade recomenda cobrir dois resultados. O risco de empate é moderado neste confronto."
+            status = "ESTRATÉGIA AGRESSIVA"
+            codigo = "VENCEDOR (RESULTADO FINAL)"
+            prob = random.uniform(55.0, 68.0)
+            porque = "Jogo de alta incerteza. Sugerimos focar no vencedor seco da equipa com melhor retrospecto recente para capturar a Odd alta do mercado."
 
-        # EXIBIÇÃO
+        # EXIBIÇÃO DO CARD
         st.markdown(f"""
         <div class="card-analise">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <span class="label-equipa">CASA</span><br><span class="nome-equipa">{jogo['casa']}</span>
-                </div>
-                <div style="text-align: center;">
-                    <span class="tag-utilidade">{tipo_utilidade}</span><br>
-                    <span style="color: #8b949e; font-size: 0.8em;">{jogo['hora'].strftime('%H:%M')}</span>
-                </div>
-                <div style="text-align: right;">
-                    <span class="label-equipa">FORA</span><br><span class="nome-equipa">{jogo['fora']}</span>
-                </div>
+                <span class="tag-risco">{status}</span>
+                <span style="color: #8b949e; font-size: 0.8em;">🕒 {jogo['hora'].strftime('%H:%M')}</span>
             </div>
-            <hr style="border: 0.1px solid #333; margin: 10px 0;">
-            <span style="color: #8b949e; font-size: 0.8em;">DECISÃO TÁTICA:</span>
-            <span class="codigo-res">{codigo}</span>
-            <span class="percent">🔥 CONFIANÇA: {prob:.1f}%</span>
-            <div style="margin-top: 10px; color: #8b949e; font-size: 0.9em; font-style: italic;">
-                <b>ANÁLISE:</b> {porque}
+            <div style="margin: 10px 0;">
+                <b style="font-size: 1.1em;">{jogo['casa']} vs {jogo['fora']}</b>
+            </div>
+            <span style="color: #8b949e; font-size: 0.8em;">CÓDIGO SUGERIDO:</span>
+            <span class="codigo-v">{codigo}</span>
+            <span style="font-size: 1.1em; color: #ffc107;">🎯 Confiança Tática: {prob:.1f}%</span>
+            <div style="margin-top: 10px; background: #0d1117; padding: 10px; border-radius: 5px; font-size: 0.9em;">
+                <b>ESTRATÉGIA:</b> {porque}
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+st.markdown("---")
+st.info("Beto AI: O objetivo é transformar 200 KZ em 50.000.000 KZ através de escolhas agressivas e inteligentes.")
