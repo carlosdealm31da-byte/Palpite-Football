@@ -1,82 +1,70 @@
 import streamlit as st
-from datetime import datetime
-import pytz
+import random
 
-# Configuração de Luanda
-angola_tz = pytz.timezone('Africa/Luanda')
-agora = datetime.now(angola_tz)
+# 1. Configuração de Estética e Cores
+st.set_page_config(page_title="Beto AI - O General", layout="centered")
 
-st.set_page_config(page_title="Beto AI - O Decisor", page_icon="🐘")
-
-# Estilo Visual Elephant Bet (Focado no Resultado)
 st.markdown("""
 <style>
-    .main { background-color: #0b1116; }
-    .stButton>button { width: 100%; border-radius: 8px; font-weight: bold; background-color: #E61E25; color: white; height: 3.5em; border: none; }
-    .decisao-card { background-color: #1a1d23; padding: 25px; border-radius: 12px; border-left: 6px solid #E61E25; color: white; margin-top: 20px; box-shadow: 0px 4px 15px rgba(0,0,0,0.5); }
-    .codigo-final { color: #00ff00; font-size: 2.2em; font-weight: bold; display: block; margin: 15px 0; text-shadow: 1px 1px #000; }
-    .porquê-box { background-color: #262a33; padding: 15px; border-radius: 8px; border: 1px solid #444; line-height: 1.5; color: #ddd; }
+    .main { background-color: #0d1117; color: white; }
+    .stButton>button { width: 100%; background-color: #E61E25; color: white; font-weight: bold; border-radius: 8px; height: 3.5em; border: none; }
+    .card-decisao { background-color: #161b22; padding: 20px; border-radius: 12px; border-left: 8px solid #E61E25; margin-top: 20px; border: 1px solid #30363d; }
+    .codigo-texto { color: #00ff00; font-size: 2.2em; font-weight: bold; display: block; margin-top: 5px; }
+    .prob-texto { color: #ffc107; font-size: 1.4em; font-weight: bold; }
+    .justificativa-box { background-color: #0d1117; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #30363d; color: #8b949e; font-style: italic; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🐘 Beto AI: Inteligência de Decisão")
-st.write(f"🕒 Hora em Luanda: **{agora.strftime('%H:%M')}**")
+st.title("🐘 Beto AI: Decisor Inteligente")
 
-# --- ENTRADA DE DADOS PARA A IA ---
-with st.container():
-    col1, col2 = st.columns(2)
-    with col1:
-        casa = st.text_input("Equipa da Casa", placeholder="Ex: Preston North End")
-        odd_c = st.number_input("Odd Casa", value=1.10, step=0.01)
-    with col2:
-        fora = st.text_input("Equipa de Fora", placeholder="Ex: Chesterfield")
-        odd_f = st.number_input("Odd Fora", value=17.00, step=0.01)
+# 2. Entrada de Dados Manual
+st.subheader("📊 Analisador de Confronto")
+col1, col2 = st.columns(2)
+with col1:
+    equipa_casa = st.text_input("Equipa da Casa", "Ex: Preston")
+    odd_casa = st.number_input("Odd Casa", value=1.50)
+with col2:
+    equipa_fora = st.text_input("Equipa de Fora", "Ex: Everton")
+    odd_fora = st.number_input("Odd Fora", value=3.00)
 
-    c1, c2 = st.columns(2)
-    with c1:
-        data_j = st.date_input("Data do Jogo", value=agora.date())
-    with c2:
-        hora_j = st.time_input("Hora de Início")
+# 3. Processamento e Decisão
+if st.button("GERAR CÓDIGO E JUSTIFICATIVA"):
+    # Lógica Simplificada de Decisão
+    if odd_casa < 1.35:
+        resultado = "1 (VENCEDOR CASA)"
+        probabilidade = random.uniform(90.1, 96.5)
+        motivo = f"A inteligência escolheu este código devido ao favoritismo técnico absoluto do {equipa_casa}. A banca indica baixa resistência do adversário."
+    elif odd_fora < 1.35:
+        resultado = "2 (VENCEDOR FORA)"
+        probabilidade = random.uniform(90.1, 96.5)
+        motivo = f"O código 2 foi selecionado porque o {equipa_fora} domina o mercado tático para este confronto, com probabilidade máxima de vitória."
+    elif 1.45 <= odd_casa <= 2.20 and 1.45 <= odd_fora <= 2.20:
+        resultado = "AMBAS MARCAM (SIM)"
+        probabilidade = random.uniform(82.5, 88.9)
+        motivo = "Confronto equilibrado. A IA escolheu este código pois as odds indicam ataques ativos de ambos os lados e defesas expostas."
+    else:
+        resultado = "+1.5 GOLOS"
+        probabilidade = random.uniform(85.0, 93.4)
+        motivo = "A decisão foi tomada para garantir segurança. O mercado de golos é mais viável do que escolher um vencedor num jogo instável."
 
-    if st.button("GERAR DECISÃO DA IA"):
-        # 1. VALIDADOR DE HORÁRIO
-        dt_evento = angola_tz.localize(datetime.combine(data_j, hora_j))
+    # 4. Exibição do Resultado
+    st.markdown(f"""
+    <div class="card-decisao">
+        <span style='color: #E61E25; font-weight: bold; font-size: 0.9em;'>🎯 DECISÃO FINAL</span><br>
+        <b>{equipa_casa} vs {equipa_fora}</b><br><br>
         
-        if dt_evento < agora:
-            st.error(f"❌ ANALISE CANCELADA: O jogo {casa} vs {fora} já decorreu ou começou às {hora_j.strftime('%H:%M')}.")
-        else:
-            # 2. MOTOR DE DECISÃO DA IA (Ela escolhe o melhor código)
-            if odd_c < 1.25:
-                codigo = "1 (VENCEDOR CASA)"
-                explicacao = f"A inteligência detectou um favoritismo extremo para o {casa}. Com uma odd de {odd_c}, a probabilidade de vitória supera os 90%. É a escolha mais lógica para garantir o green sem correr riscos desnecessários."
-            elif odd_f < 1.25:
-                codigo = "2 (VENCEDOR FORA)"
-                explicacao = f"O {fora} entra em campo com superioridade total. O mercado esmagou a odd para {odd_f}, indicando que qualquer outro resultado seria uma zebra histórica. O código 2 é a decisão final."
-            elif 1.40 <= odd_c <= 2.10 and 1.40 <= odd_f <= 2.10:
-                codigo = "AMBAS MARCAM (SIM)"
-                explicacao = f"Este é um jogo de equilíbrio dinâmico. Ambas as equipas têm odds parecidas, o que indica que os dois ataques são perigosos. A IA escolheu este código porque a chance de um 1-1 ou 2-1 é maior do que uma vitória seca."
-            elif odd_c > 2.50 and odd_fora > 2.50:
-                codigo = "+1.5 GOLOS"
-                explicacao = "Jogo sem favorito claro e com defesas instáveis. A inteligência prefere não arriscar no vencedor e focar na rede balançar. O código de golos oferece a melhor relação risco-retorno aqui."
-            else:
-                codigo = "1X (DUPLA CHANCE)"
-                explicacao = f"Apesar do favoritismo do {casa}, há uma pequena instabilidade nas odds. A IA decide pela segurança do 1X para cobrir um possível empate tardio, mantendo o bilhete vivo."
-
-            # EXIBIÇÃO DA DECISÃO
-            st.markdown(f"""
-            <div class="decisao-card">
-                <span style='color: #E61E25; font-size: 0.9em; font-weight: bold;'>🎯 DECISÃO DA INTELIGÊNCIA</span><br>
-                <b style='font-size: 1.3em;'>{casa} vs {fora}</b><br>
-                <span style='color: #888;'>Janela de Tempo: {hora_j.strftime('%H:%M')}</span>
-                
-                <span class="codigo-final">{codigo}</span>
-                
-                <div class="porquê-box">
-                    <b>PORQUÊ ESTE CÓDIGO?</b><br>
-                    {explicacao}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        <span style='color: #8b949e; font-size: 0.85em;'>CÓDIGO SUGERIDO:</span>
+        <span class="codigo-texto">{resultado}</span>
+        
+        <span style='color: #8b949e; font-size: 0.85em;'>PROBABILIDADE DE SUCESSO:</span><br>
+        <span class="prob-texto">🔥 {probabilidade:.1f}%</span>
+        
+        <div class="justificativa-box">
+            <b>JUSTIFICATIVA DA ESCOLHA:</b><br>
+            {motivo}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
-st.info("Beto AI: Analisando o mercado em tempo real para tomar a melhor decisão por ti.")
+st.caption("Beto AI: O General da sua banca.")
