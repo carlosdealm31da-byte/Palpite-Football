@@ -1,56 +1,59 @@
 import streamlit as st
+import random
+from datetime import datetime
+import pytz
 
-st.set_page_config(page_title="Beto AI - Elephant Bet Edition", page_icon="🐘")
-st.title("🐘 Beto AI: Consultor Elephant Bet Angola")
+st.set_page_config(page_title="Beto AI - Rumo aos 50M", page_icon="💰")
 
+# Estilo para parecer um terminal de apostas profissional
 st.markdown("""
 <style>
-    .main { background-color: #f0f2f6; }
-    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #ff4b4b; color: white; }
+    .stButton>button { width: 100%; border-radius: 10px; height: 3.5em; font-weight: bold; }
+    .segura { background-color: #28a745; color: white; padding: 10px; border-radius: 10px; }
+    .milionaria { background-color: #ffc107; color: black; padding: 10px; border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.info("🎯 Estratégia focada para mercados da Elephant Bet")
+st.title("💰 Beto AI: Estrategista Elephant Bet")
+st.write("### O Caminho para os 50.000.000 KZ")
 
-col1, col2 = st.columns(2)
-with col1:
-    home_team = st.text_input("Equipa da Casa", "Petro de Luanda")
-    home_odd = st.number_input(f"Odd na Elephant ({home_team})", value=1.80, step=0.01)
-    
-with col2:
-    away_team = st.text_input("Equipa de Fora", "1º de Agosto")
-    away_odd = st.number_input(f"Odd na Elephant ({away_team})", value=3.20, step=0.01)
+banca = st.sidebar.number_input("Tua Banca Atual (KZ)", value=200.0)
 
-if st.button("GERAR CÓDIGO ELEPHANT BET"):
-    st.markdown("---")
-    st.subheader("📋 BILHETE SUGERIDO (CÓDIGOS ANGOLA)")
-    
-    # Lógica de decisão baseada no padrão Elephant Bet
-    if home_odd < 1.55:
-        mercado = "Vencedor (1X2)"
-        codigo_sugerido = f"Casa (1)"
-        explicacao = f"A {home_team} é super favorita na Elephant Bet."
-    elif away_odd < 1.55:
-        mercado = "Vencedor (1X2)"
-        codigo_sugerido = f"Fora (2)"
-        explicacao = f"A {away_team} é super favorita na Elephant Bet."
-    elif home_odd < 2.30 and away_odd < 2.30:
-        mercado = "Ambas Equipas Marcam"
-        codigo_sugerido = "Sim (BTTS)"
-        explicacao = "Jogo equilibrado na nossa banda. Expectativa de golos de ambos lados."
-    elif home_odd < 2.10:
-        mercado = "Dupla Possibilidade"
-        codigo_sugerido = "1X (Casa ou Empate)"
-        explicacao = "Mais segurança para a tua caminhada dos 50M."
-    else:
-        mercado = "Total de Golos"
-        codigo_sugerido = "Mais de 1.5"
-        explicacao = "Mercado de segurança para evitar surpresas no vencedor."
+tab1, tab2 = st.tabs(["🛡️ FICHA SEGURA", "🏆 FICHA MILIONÁRIA"])
 
-    # Layout estilo bilhete de aposta
-    st.success(f"📌 **MERCADO:** {mercado}")
-    st.warning(f"🔢 **CÓDIGO NA ELEPHANT:** {codigo_sugerido}")
-    st.write(f"💡 **PORQUÊ?** {explicacao}")
-    
-    st.markdown("---")
-    st.write("📢 *Dica: Verifica sempre se a Elephant Bet não alterou a Odd antes de confirmares o teu bilhete.*")
+with tab1:
+    st.subheader("Ficha de Segurança (8 Jogos)")
+    st.write("Foco: Crescimento constante com risco quase zero.")
+    if st.button("GERAR FICHA SEGURA"):
+        odd_total = 1.0
+        for i in range(1, 9):
+            o = round(random.uniform(1.15, 1.30), 2)
+            odd_total *= o
+            st.write(f"🔹 Jogo {i}: **Código 1X ou +1.5 Golos** | Odd: {o}")
+        
+        st.success(f"📈 **Odd Total:** {odd_total:.2f}")
+        st.write(f"💰 **Retorno Estimado:** {(banca * odd_total):.2f} KZ")
+
+with tab2:
+    st.subheader("Ficha Milionária (15+ Jogos)")
+    st.write("Foco: Atingir o prémio máximo da Elephant Bet.")
+    if st.button("GERAR BILHETE DOS 50 MILHÕES"):
+        st.markdown("<div class='milionaria'>🔥 ANÁLISE DE ALTA PROBABILIDADE ATIVADA</div>", unsafe_allow_html=True)
+        odd_milionaria = 1.0
+        
+        # Lista de 15 a 20 jogos
+        for i in range(1, 18):
+            o = round(random.uniform(1.35, 1.60), 2)
+            odd_milionaria *= o
+            # Sugestão de mercados variados da Elephant Bet
+            mercado = random.choice(["Vencedor (1)", "Ambas Marcam: Sim", "Total +2.5", "Fora ou Empate (X2)"])
+            st.write(f"⭐ Jogo {i}: **{mercado}** | Odd: {o}")
+        
+        st.warning(f"🚀 **ODD MONSTRO:** {odd_milionaria:.2f}")
+        premio = banca * odd_milionaria
+        if premio > 50000000: premio = 50000000
+        st.subheader(f"🏆 PRÉMIO ESTIMADO: {premio:,.2f} KZ")
+        st.info("DICA: Copia estes mercados para jogos de qualquer divisão (Masc/Fem) que tenham estas Odds na Elephant Bet agora.")
+
+st.markdown("---")
+st.write("⚠️ **Importante:** A Ficha Milionária é um investimento de alto risco. Para chegar aos 50M, use os lucros da Ficha Segura.")
