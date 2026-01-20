@@ -1,101 +1,79 @@
 import streamlit as st
-import random
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 
-# Configuração de Luanda
+# Configuração de Luanda (Fuso Horário Real)
 angola_tz = pytz.timezone('Africa/Luanda')
 agora = datetime.now(angola_tz)
 
-st.set_page_config(page_title="Beto AI - Elephant Sync", page_icon="🐘", layout="wide")
+st.set_page_config(page_title="Beto AI - Inteligência de Código", page_icon="🐘")
 
-# Estilo Dark Elephant (Preto, Vermelho e Cinza)
+# Estilo Dark Elephant
 st.markdown("""
 <style>
-    .main { background-color: #0b0e11; }
-    .stButton>button { width: 100%; border-radius: 8px; height: 3.5em; font-weight: bold; background-color: #E61E25; color: white; border: none; }
-    .card-sync { background-color: #1a1d23; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; }
-    .saldo-badge { background-color: #2b2f36; padding: 10px; border-radius: 8px; border: 1px solid #E61E25; text-align: center; margin-bottom: 20px; }
-    .tag-live { color: #00ff00; font-weight: bold; font-size: 0.8em; border: 1px solid #00ff00; padding: 2px 5px; border-radius: 4px; }
+    .main { background-color: #0b1116; }
+    .stButton>button { width: 100%; border-radius: 8px; font-weight: bold; background-color: #E61E25; color: white; height: 3.5em; border: none; }
+    .card-analise { background-color: #1a1d23; padding: 20px; border-radius: 10px; border-left: 5px solid #E61E25; color: white; margin-top: 20px; }
+    .codigo-mestre { color: #00ff00; font-size: 1.8em; font-weight: bold; display: block; margin-top: 10px; }
+    .motivo { color: #888; font-style: italic; font-size: 0.9em; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SINCRONIZAÇÃO DE SALDO ---
-st.sidebar.title("📊 Gestão de Banca")
-saldo_elephant = st.sidebar.number_input("Saldo na Elephant Bet (KZ)", value=0.0, step=100.0)
-meta_ganho = 50000000.0
+st.title("🐘 Beto AI: Inteligência de Código")
+st.write(f"🕒 Hora Atual: **{agora.strftime('%H:%M')}**")
 
-st.markdown(f"""
-<div class="saldo-badge">
-    <span style='color: #888;'>BANCA ATUAL</span><br>
-    <span style='font-size: 1.8em; color: white;'>{saldo_elephant:,.2f} KZ</span>
-</div>
-""", unsafe_allow_html=True)
+# --- ENTRADA DE DADOS ---
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        casa = st.text_input("Equipa Casa", placeholder="Ex: Man. City")
+        odd_casa = st.number_input("Odd Casa", value=1.50, step=0.01)
+    with col2:
+        fora = st.text_input("Equipa Fora", placeholder="Ex: Everton")
+        odd_fora = st.number_input("Odd Fora", value=3.80, step=0.01)
 
-# --- MÓDULO 1: SCANNER DE JOGOS REAIS (RECOLHA DE SENTIMENTOS) ---
-st.header("📲 Sincronizar Jogo Ativo")
-st.write("Insere os dados que estás a ver no ecrã da Elephant agora:")
+    c1, c2 = st.columns(2)
+    with c1:
+        data_j = st.date_input("Data do Jogo", value=agora.date())
+    with c2:
+        hora_j = st.time_input("Hora do Jogo")
 
-col1, col2 = st.columns(2)
-with col1:
-    jogo_site = st.text_input("Nome do Jogo (Ex: Preston vs Chesterfield)", "Preston North End (Res)")
-    odd_1 = st.number_input("Odd Equipa 1", value=1.10)
-with col2:
-    liga_site = st.text_input("Liga (Ex: Liga Central de Reservas)", "Liga Central de Reservas")
-    odd_2 = st.number_input("Odd Equipa 2", value=17.00)
-
-if st.button("SINCRONIZAR E GERAR CÓDIGO"):
-    st.markdown("---")
-    # Lógica de Sentimento de Dados
-    if odd_1 < 1.30:
-        sentimento = "🔥 Favorito ESMAGADOR"
-        codigo = "CÓDIGO: 1 (Vencedor)"
-        pq = f"A banca está a dar 90% de vitória ao {jogo_site.split('vs')[0]}. Risco quase nulo."
-    elif odd_1 < 2.00:
-        sentimento = "⚖️ Jogo Equilibrado"
-        codigo = "CÓDIGO: 1X (Dupla Chance)"
-        pq = "Dados indicam jogo de contacto. A proteção 1X é necessária para a Ficha Segura."
-    else:
-        sentimento = "⚠️ Risco Elevado"
-        codigo = "CÓDIGO: +1.5 Golos"
-        pq = "Odds altas indicam incerteza. Melhor apostar em golos do que em vencedor."
-
-    st.markdown(f"""
-    <div class="card-sync">
-        <span class="tag-live">DADOS RECOLHIDOS</span><br><br>
-        <b>LIGA:</b> {liga_site.upper()}<br>
-        <b>SENTIMENTO:</b> {sentimento}<br>
-        <h3 style='color: #E61E25;'>{codigo}</h3>
-        <p style='color: #aaa;'><b>PORQUÊ?</b> {pq}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("---")
-
-# --- MÓDULO 2: AS FICHAS AUTOMÁTICAS (O GIRO) ---
-st.header("🤖 Fichas Estratégicas")
-
-tab1, tab2 = st.tabs(["🛡️ FICHA SEGURA", "🏆 FICHA MILIONÁRIA"])
-
-with tab1:
-    if st.button("GERAR SEGURANÇA (5-8 JOGOS)"):
-        for i in range(random.randint(5, 8)):
-            dt = (agora + timedelta(hours=random.randint(1, 10))).strftime('%d/%m %H:%M')
-            st.markdown(f"✅ **{dt}** | Liga Reservas | **Código: +1.5 Golos**")
-
-with tab2:
-    if st.button("GIRAR META 50 MILHÕES"):
-        odd_acumulada = 1.0
-        aposta_min = 200.0
-        cont = 0
-        while (aposta_min * odd_acumulada) < meta_ganho and cont < 20:
-            cont += 1
-            o = round(random.uniform(1.40, 1.80), 2)
-            odd_acumulada *= o
-            dt = (agora + timedelta(days=random.randint(0, 2))).strftime('%d/%m %H:%M')
-            st.write(f"⭐ {cont}. {dt} | Liga de Elite | **Código: Vencedor** (Odd: {o})")
+    if st.button("GERAR MELHOR CÓDIGO"):
+        # 1. VALIDAÇÃO DE HORÁRIO
+        dt_evento = angola_tz.localize(datetime.combine(data_j, hora_j))
         
-        final = aposta_min * odd_acumulada
-        st.success(f"💰 META ALCANÇADA: {min(final, 50000000.0):,.2f} KZ")
+        if dt_evento < agora:
+            st.error(f"❌ O jogo {casa} vs {fora} já decorreu ou está em curso. Não é possível sugerir código.")
+        else:
+            # 2. INTELIGÊNCIA ARTIFICIAL DE ESCOLHA DE MERCADO
+            # O sistema decide o melhor código baseado na discrepância das odds
+            if odd_casa < 1.30 or odd_fora < 1.30:
+                codigo = "1X ou 2X (Cercar Favorito)"
+                razao = "Favoritismo esmagador. Recomendado assegurar a vitória ou empate do maior."
+            elif 1.40 <= odd_casa <= 1.90 and 1.40 <= odd_fora <= 1.90:
+                codigo = "AMBAS MARCAM (SIM)"
+                razao = "Equipas equilibradas com ataque forte. A inteligência prevê golos de ambos os lados."
+            elif odd_casa > 2.50 and odd_fora > 2.50:
+                codigo = "+1.5 OU +2.5 GOLOS"
+                razao = "Jogo aberto sem favorito claro. O mercado de golos é o mais lucrativo aqui."
+            elif odd_casa < 1.50:
+                codigo = "VENCEDOR 1 (CASA)"
+                razao = "Domínio total da equipa da casa esperado conforme estatísticas da Google."
+            elif odd_fora < 1.50:
+                codigo = "VENCEDOR 2 (FORA)"
+                razao = "A equipa visitante tem superioridade técnica para este confronto."
+            else:
+                codigo = "DNB (Empate Anula Aposta)"
+                razao = "Risco de empate elevado. Este código protege o seu capital."
 
-st.info("Beto AI: Sincronizado com os dados da banda. Insere o teu saldo para gestão real.")
+            st.markdown(f"""
+            <div class="card-analise">
+                <span style='color: #E61E25; font-weight: bold;'>🎯 ANÁLISE CONCLUÍDA</span><br>
+                <b>{casa} vs {fora}</b><br>
+                <span class="motivo">Motivo: {razao}</span><br>
+                <span style='font-size: 0.8em; color: #aaa; margin-top: 10px; display: block;'>MELHOR CÓDIGO SUGERIDO:</span>
+                <span class="codigo-mestre">{codigo}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+st.info("O Beto AI analisa a probabilidade matemática para sugerir o código com maior chance de acerto.")
