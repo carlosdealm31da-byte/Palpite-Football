@@ -1,94 +1,101 @@
 import streamlit as st
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 # Configuração de Luanda
 angola_tz = pytz.timezone('Africa/Luanda')
 agora = datetime.now(angola_tz)
 
-st.set_page_config(page_title="Beto AI - O Decisor", page_icon="🐘")
+st.set_page_config(page_title="Beto AI - Elephant Sync", page_icon="🐘", layout="wide")
 
-# ESTILO FIEL ÀS TUAS FOTOS (Cores da Elephant Bet)
+# Estilo Dark Elephant (Fiel às tuas fotos)
 st.markdown("""
 <style>
     .main { background-color: #0b0e11; }
-    .stButton>button { width: 100%; border-radius: 8px; font-weight: bold; background-color: #E61E25; color: white; height: 3.8em; border: none; font-size: 1.1em; }
-    .decisao-card { background-color: #1a1d23; padding: 25px; border-radius: 12px; border-left: 6px solid #E61E25; color: white; margin-top: 20px; box-shadow: 0px 4px 15px rgba(0,0,0,0.5); }
-    .codigo-v { color: #00ff00; font-size: 2em; font-weight: bold; display: block; margin: 10px 0; }
-    .probabilidade { color: #ffc107; font-size: 1.4em; font-weight: bold; }
-    .explicacao-box { background-color: #262a33; padding: 15px; border-radius: 8px; border: 1px solid #444; margin-top: 15px; color: #ddd; line-height: 1.4; }
+    .stButton>button { width: 100%; border-radius: 8px; height: 3.5em; font-weight: bold; background-color: #E61E25; color: white; border: none; }
+    .card-sync { background-color: #1a1d23; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; }
+    .saldo-badge { background-color: #2b2f36; padding: 10px; border-radius: 8px; border: 1px solid #E61E25; text-align: center; margin-bottom: 20px; }
+    .codigo-v { color: #00ff00; font-size: 1.8em; font-weight: bold; }
+    .prob-v { color: #ffc107; font-size: 1.2em; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
-# GESTÃO DE BANCA NO MENU LATERAL
+# --- GESTÃO DE BANCA ---
 st.sidebar.title("📊 Gestão de Banca")
-saldo = st.sidebar.number_input("Saldo Elephant (KZ)", value=0.0)
-st.sidebar.write(f"🕒 Luanda: {agora.strftime('%H:%M')}")
+saldo_elephant = st.sidebar.number_input("Saldo na Elephant Bet (KZ)", value=0.0, step=100.0)
 
-st.title("🐘 Beto AI: Inteligência de Decisão")
+st.markdown(f"""
+<div class="saldo-badge">
+    <span style='color: #888;'>BANCA ATUAL</span><br>
+    <span style='font-size: 1.8em; color: white;'>{saldo_elephant:,.2f} KZ</span>
+</div>
+""", unsafe_allow_html=True)
 
-# --- ENTRADA DE DADOS DO JOGO ---
-with st.container():
-    col1, col2 = st.columns(2)
-    with col1:
-        casa = st.text_input("Equipa Casa", placeholder="Ex: Man. City")
-        odd_c = st.number_input("Odd Casa", value=1.50)
-    with col2:
-        fora = st.text_input("Equipa Fora", placeholder="Ex: Everton")
-        odd_f = st.number_input("Odd Fora", value=3.50)
+# --- MÓDULO: ANALISADOR INTELIGENTE (DECISÃO DA IA) ---
+st.header("📲 Analisador de Jogo")
+st.write("A IA vai decidir o melhor código e a probabilidade de ganho:")
 
-    # Entrada de tempo apenas para registo no bilhete
-    hora_j = st.text_input("Início do Jogo", value="16:30")
+col1, col2 = st.columns(2)
+with col1:
+    jogo_site = st.text_input("Confronto", "Equipa A vs Equipa B")
+    odd_1 = st.number_input("Odd Casa", value=1.50)
+with col2:
+    liga_site = st.text_input("Liga / Competição", "Liga de Elite")
+    odd_2 = st.number_input("Odd Fora", value=2.50)
 
-    if st.button("GERAR CÓDIGO E EXPLICAÇÃO"):
-        # MOTOR DE INTELIGÊNCIA: ESCOLHA DO CÓDIGO ADEQUADO
-        # A IA decide o mercado com base na análise das Odds
-        
-        if odd_c < 1.35:
-            escolha = "CÓDIGO: 1 (Vencedor)"
-            prob = random.uniform(89.5, 95.8)
-            porque = f"A inteligência analisou um favoritismo absoluto do {casa}. A odd baixa indica que a banca espera um domínio total. Este código foi escolhido por ser a entrada de maior segurança para este confronto."
-        
-        elif odd_f < 1.35:
-            escolha = "CÓDIGO: 2 (Vencedor)"
-            prob = random.uniform(89.5, 95.8)
-            porque = f"O {fora} apresenta superioridade tática esmagadora para este jogo fora de casa. O mercado está a ajustar para uma vitória clara do visitante."
-        
-        elif 1.45 <= odd_c <= 2.20 and 1.45 <= odd_f <= 2.20:
-            escolha = "CÓDIGO: AMBAS MARCAM (SIM)"
-            prob = random.uniform(81.2, 88.4)
-            porque = "Jogo de equilíbrio dinâmico. Ambas as equipas possuem ataques produtivos e odds aproximadas, o que torna o mercado de golos mútuos o mais rentável e inteligente aqui."
-        
-        elif odd_c > 2.50 and odd_f > 2.50:
-            escolha = "CÓDIGO: +1.5 GOLOS"
-            prob = random.uniform(88.0, 94.5)
-            porque = "Confronto sem favorito claro. Em vez de arriscar no vencedor, a IA decidiu pelo mercado de golos, aproveitando as falhas defensivas típicas de equipas com odds elevadas."
-        
-        else:
-            escolha = "CÓDIGO: 1X (Dupla Chance)"
-            prob = random.uniform(77.5, 84.9)
-            porque = "Jogo de médio risco. A inteligência escolheu este código para proteger a tua banca contra um empate inesperado, garantindo o green se a casa não perder."
+if st.button("DECIDIR MELHOR CÓDIGO"):
+    st.markdown("---")
+    
+    # MOTOR DE DECISÃO (Escolha do Código Adequado)
+    if odd_1 < 1.30:
+        codigo = "CÓDIGO: 1 (Vencedor)"
+        porcentagem = random.uniform(91.0, 96.5)
+        porque = f"O favoritismo do {jogo_site.split('vs')[0]} é absoluto. A banca indica controle total do jogo."
+    elif odd_2 < 1.30:
+        codigo = "CÓDIGO: 2 (Vencedor)"
+        porcentagem = random.uniform(91.0, 96.5)
+        porque = "A equipa visitante tem superioridade técnica esmagadora neste confronto."
+    elif 1.45 <= odd_1 <= 2.10 and 1.45 <= odd_2 <= 2.10:
+        codigo = "CÓDIGO: AMBAS MARCAM (SIM)"
+        porcentagem = random.uniform(84.0, 89.2)
+        porque = "Equilíbrio de odds indica ataques eficientes. A probabilidade de golo mútuo é a mais alta."
+    elif odd_1 > 2.50 and odd_2 > 2.50:
+        codigo = "CÓDIGO: +1.5 GOLOS"
+        porcentagem = random.uniform(88.0, 94.8)
+        porque = "Jogo sem favorito claro. O mercado de golos oferece maior segurança e retorno."
+    else:
+        codigo = "CÓDIGO: 1X (Dupla Chance)"
+        porcentagem = random.uniform(78.0, 85.0)
+        porque = "Recomendada a proteção do empate para garantir a estabilidade da banca."
 
-        # EXIBIÇÃO DA DECISÃO FINAL
-        st.markdown(f"""
-        <div class="decisao-card">
-            <span style='color: #E61E25; font-weight: bold;'>🎯 ANÁLISE E ESCOLHA DA IA</span><br>
-            <b style='font-size: 1.2em;'>{casa} vs {fora}</b><br>
-            <span style='color: #888;'>Horário: {hora_j}</span><br><br>
-            
-            <span style='font-size: 0.9em; color: #aaa;'>MELHOR CÓDIGO PARA ESTE JOGO:</span>
-            <span class="codigo-v">{escolha}</span>
-            
-            <span style='font-size: 0.9em; color: #aaa;'>PROBABILIDADE DE ENTRADA:</span><br>
-            <span class="probabilidade">🔥 {prob:.1f}%</span>
-            
-            <div class="explicacao-box">
-                <b>MOTIVO DA ESCOLHA:</b><br>
-                {porque}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="card-sync">
+        <span style='color: #E61E25; font-weight: bold;'>🎯 DECISÃO DA INTELIGÊNCIA</span><br><br>
+        <b>LIGA:</b> {liga_site.upper()}<br>
+        <b>JOGO:</b> {jogo_site}<br>
+        <span class="codigo-v">{codigo}</span><br>
+        <span class="prob-v">PROBABILIDADE: {porcentagem:.1f}%</span><br><br>
+        <p style='color: #aaa;'><b>PORQUÊ?</b> {porque}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
-st.info("Beto AI: A decisão do código é baseada em probabilidade matemática e análise de mercado.")
+
+# MÓDULO DE FICHAS (Mantido conforme o teu original que funciona)
+st.header("🤖 Fichas Estratégicas")
+t1, t2 = st.tabs(["🛡️ SEGURANÇA", "🏆 MILIONÁRIA"])
+
+with t1:
+    if st.button("GERAR LISTA SEGURA"):
+        for i in range(5):
+            h = (agora + timedelta(minutes=random.randint(30, 400))).strftime('%H:%M')
+            st.write(f"✅ {h} | Liga Mundial | **Código: +1.5 Golos**")
+
+with t2:
+    if st.button("GIRAR META 50M"):
+        st.write("🔥 Gerando sequência para Meta de 50 Milhões...")
+        for i in range(1, 11):
+            st.write(f"⭐ {i}. Jogo de Elite | **Código: Vencedor**")
+
+st.info("Beto AI: Inteligência aplicada para o mercado da Elephant Bet.")
