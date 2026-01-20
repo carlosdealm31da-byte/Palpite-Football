@@ -7,104 +7,118 @@ import pytz
 angola_tz = pytz.timezone('Africa/Luanda')
 agora = datetime.now(angola_tz)
 
-st.set_page_config(page_title="Beto AI - Sistema de Odds Total", layout="wide")
+st.set_page_config(page_title="Beto AI - Premium", layout="wide")
 
 # Inicializar Bancos
 if 'banco_segura' not in st.session_state: st.session_state.banco_segura = []
 if 'banco_milionario' not in st.session_state: st.session_state.banco_milionario = []
 
+# --- ESTÉTICA PREMIUM (EMBELEZAMENTO TOTAL) ---
 st.markdown("""
 <style>
-    .main { background-color: #0b0e11; }
-    .quadrado-x { 
-        background-color: #1a1d23; padding: 25px; border-radius: 15px; 
-        border: 2px solid #333; margin-bottom: 20px; border-left: 10px solid #E61E25;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+    
+    html, body, [class*="st-"] { font-family: 'Inter', sans-serif; background-color: #05070a; }
+    
+    /* Quadrado X Estilo Glassmorphism */
+    .quadrado-premium { 
+        background: linear-gradient(145deg, #10141b, #0d0f14);
+        padding: 25px; 
+        border-radius: 20px; 
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 25px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: transform 0.3s ease;
     }
-    .v-codigo { color: #39d353; font-size: 2.3em; font-weight: bold; }
-    .caixa-porque { 
-        background-color: #0d1117; padding: 15px; border-radius: 10px; 
-        border: 1px solid #444; color: #f1e05a; font-size: 0.95em;
+    .quadrado-premium:hover { transform: translateY(-5px); border: 1px solid rgba(57, 211, 83, 0.3); }
+    
+    /* Tipografia e Cores */
+    .v-codigo { 
+        background: linear-gradient(90deg, #39d353, #2ea043);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.8em; font-weight: 900; letter-spacing: -1px;
     }
-    .display-odds { color: #8b949e; font-weight: bold; margin-bottom: 10px; }
+    .badge-odds { background: #1a1d23; color: #f1e05a; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 0.9em; border: 1px solid #333; }
+    .justificativa-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-left: 4px solid #39d353; color: #8b949e; font-size: 0.95em; }
+    
+    /* Cabeçalho de Status */
+    .header-info { background: linear-gradient(90deg, #0d1117, #161b22); padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 30px; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🦅 Beto AI: Visão de Águia (ODDS CASA/FORA)")
-st.write(f"🕒 Central Luanda: **{agora.strftime('%H:%M')}**")
+# --- CABEÇALHO ---
+st.markdown(f"""
+<div class="header-info">
+    <h1 style="margin:0; color:white; font-weight:900;">🦅 BETO AI <span style="color:#E61E25;">V3</span></h1>
+    <p style="margin:5px 0 0 0; color:#8b949e;">LUANDA, ANGOLA | <b>{agora.strftime('%H:%M')}</b></p>
+</div>
+""", unsafe_allow_html=True)
 
-# --- MOTOR DE JUSTIFICATIVA COM ANÁLISE DE ODDS ---
-def processar_estrategia(casa, fora, o_casa, o_fora, hora, modo):
-    # IA decide o código baseado na comparação das Odds (Dedés)
+# --- MOTOR DE INTELIGÊNCIA ---
+def analisar_missao(casa, fora, oc, of, hora, modo):
     if modo == "segura":
-        # Se as odds forem próximas, vai no mercado de golos
-        if abs(o_casa - o_fora) < 0.5:
-            codigo = "TOTAL +1.5 GOLOS"
-            pq = f"Análise: Equipes equilibradas (Casa {o_casa} | Fora {o_fora}). O risco de empate é alto, por isso foquei no volume de golos para garantir a meta de 1.000 KZ."
-        else:
-            codigo = "DUPLA CHANCE"
-            pq = f"Análise: Há um favorito claro. Cobrimos dois resultados para manter a segurança da ficha."
-    else: # Milionária
-        codigo = "HANDICAP (-1.5)" if o_casa < o_fora else "AMBAS MARCAM & +2.5"
-        pq = f"Análise Milionária: Com Odd Casa {o_casa} vs Fora {o_fora}, a IA detectou uma oportunidade de alavancagem agressiva para os 50M."
+        codigo = "DUPLA CHANCE" if abs(oc-of) > 0.4 else "TOTAL +1.5 GOLOS"
+        tipo = "PROTEÇÃO DE CAPITAL"
+    else:
+        codigo = "HANDICAP (-1.5)" if oc < of else "AMBAS MARCAM & +2.5"
+        tipo = "ALAVANCAGEM MILIONÁRIA"
+    
+    just = f"Análise Beto AI: Confronto detectado entre {casa} ({oc}) e {fora} ({of}). Decidi pelo código {codigo} pois a estrutura das odds indica uma zona de {tipo}. Apto para armazenamento imediato."
+    return {"jogo": f"{casa} vs {fora}", "oc": oc, "of": of, "codigo": codigo, "just": just, "hora": hora, "odd": oc if oc < of else of}
 
-    return {
-        "jogo": f"{casa} vs {fora}",
-        "o_casa": o_casa,
-        "o_fora": o_fora,
-        "codigo": codigo,
-        "just": pq,
-        "hora": hora,
-        "odd_calculo": min(o_casa, o_fora) * 1.5 # Simulação de prémio
-    }
-
-# --- ABAS ---
-tab1, tab2 = st.tabs(["🛡️ FICHA SEGURA", "🏆 FICHA MILIONÁRIA"])
+# --- INTERFACE DE COMANDO ---
+tab1, tab2 = st.tabs(["🛡️ FICHA SEGURA (SEM LIMITES)", "🏆 FICHA MILIONÁRIA (50M)"])
 
 for tab, modo, banco, cor in zip([tab1, tab2], ["segura", "milionaria"], 
                                  [st.session_state.banco_segura, st.session_state.banco_milionario],
                                  ["#238636", "#E61E25"]):
     with tab:
-        # 1. VISÃO DE ÁGUIA (LEITURA DE FOTO/QR)
-        st.subheader(f"📷 Scanner {modo.upper()}")
-        foto = st.file_uploader(f"Subir imagem para {modo.capitalize()}", type=['png', 'jpg'], key=f"f_{modo}")
+        # Área de Entrada (Manual e Visão)
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            with st.expander("➕ COMANDO MANUAL", expanded=False):
+                ec = st.text_input("Casa", key=f"c_{modo}")
+                ef = st.text_input("Fora", key=f"f_{modo}")
+                col_o1, col_o2, col_h = st.columns(3)
+                eo1 = col_o1.number_input("Odd Casa", 1.01, key=f"o1_{modo}")
+                eo2 = col_o2.number_input("Odd Fora", 1.01, key=f"o2_{modo}")
+                eh = col_h.text_input("Hora", "20:00", key=f"h_{modo}")
+                if st.button("📥 GUARDAR NO BANCO", key=f"btn_{modo}"):
+                    st.session_state[f"banco_{modo}"].append(analisar_missao(ec, ef, eo1, eo2, eh, modo))
+                    st.rerun()
         
-        if foto and st.button(f"🦅 LER E ANALISAR ODDS", key=f"s_{modo}"):
-            # Simulação: IA extraindo Odds de Casa e Fora da foto
-            lidos = [("Real Madrid", "AC Milan", 1.50, 5.80, "21:00")]
-            for c, f, oc, of, h in lidos:
-                res = processar_estrategia(c, f, oc, of, h, modo)
-                banco.append(res)
-            st.rerun()
+        with c2:
+            foto = st.file_uploader("📷 VISÃO DE ÁGUIA (FOTO/QR)", type=['png', 'jpg'], key=f"img_{modo}")
+            if foto and st.button("🦅 ESCANEAR IMAGEM", key=f"scan_{modo}"):
+                # Simulação de leitura avançada
+                st.session_state[f"banco_{modo}"].append(analisar_missao("Real Madrid", "AC Milan", 1.50, 5.80, "21:00", modo))
+                st.rerun()
 
-        # 2. MODO MANUAL INTEGRADO (COM AS DUAS ODDS)
-        with st.expander("➕ INSERÇÃO MANUAL (CASA/FORA)"):
-            c1, c2 = st.columns(2)
-            mc = c1.text_input("Equipa Casa", key=f"mc_{modo}")
-            mf = c2.text_input("Equipa Fora", key=f"mf_{modo}")
-            c3, c4, c5 = st.columns(3)
-            oc = c3.number_input("Odd Casa", 1.01, key=f"oc_{modo}")
-            of = c4.number_input("Odd Fora", 1.01, key=f"of_{modo}")
-            mh = c5.text_input("Hora", "20:00", key=f"mh_{modo}")
-            
-            if st.button("📥 GUARDAR NO ARMAZENAMENTO", key=f"bm_{modo}"):
-                res = processar_estrategia(mc, mf, oc, of, mh, modo)
-                banco.append(res); st.rerun()
-
-        # 3. EXIBIÇÃO DO BANCO
+        # Listagem dos Jogos com Estética Premium
         st.markdown("---")
         for i, j in enumerate(banco):
             st.markdown(f"""
-            <div class="quadrado-x" style="border-left-color: {cor}">
-                <small>🕒 {j['hora']} | JOGO {i+1}</small>
-                <div style="font-size:1.4em; font-weight:bold; color:white;">{j['jogo']}</div>
-                <div class="display-odds">🏠 CASA: {j['o_casa']} | ✈️ FORA: {j['o_fora']}</div>
-                <span class="v-codigo">{j['codigo']}</span>
-                <div class="caixa-porque"><b>🧠 ESTRATÉGIA IA:</b><br>{j['just']}</div>
+            <div class="quadrado-premium" style="border-left: 8px solid {cor};">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="color:#8b949e; font-size:0.8em; font-weight:bold;">🕒 {j['hora']} | MISSÃO {i+1}</span>
+                    <div>
+                        <span class="badge-odds">CASA: {j['oc']}</span>
+                        <span class="badge-odds">FORA: {j['of']}</span>
+                    </div>
+                </div>
+                <div style="font-size:1.8em; font-weight:900; color:white; margin-bottom:5px;">{j['jogo']}</div>
+                <div class="v-codigo">{j['codigo']}</div>
+                <div class="justificativa-box">
+                    <b>🧠 JUSTIFICATIVA TÁTICA:</b><br>{j['just']}
+                </div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button(f"🗑️ Remover {i+1}", key=f"del_{modo}_{i}"):
-                banco.pop(i); st.rerun()
+            if st.button(f"🗑️ EXCLUIR JOGO {i+1}", key=f"del_{modo}_{i}"):
+                banco.pop(i)
+                st.rerun()
 
-if st.sidebar.button("🗑️ LIMPAR TUDO"):
+# Sidebar de Limpeza
+if st.sidebar.button("🚨 REINICIAR SISTEMA"):
     st.session_state.clear()
     st.rerun()
