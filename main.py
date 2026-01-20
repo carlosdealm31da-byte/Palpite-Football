@@ -6,93 +6,81 @@ import pytz
 angola_tz = pytz.timezone('Africa/Luanda')
 agora = datetime.now(angola_tz)
 
-st.set_page_config(page_title="Beto AI - Comando Manual", layout="wide")
+st.set_page_config(page_title="Beto AI - Manual e Visual", layout="wide")
 
-# Inicializar Armazenamento
 if 'banco_segura' not in st.session_state: st.session_state.banco_segura = []
 if 'banco_milionario' not in st.session_state: st.session_state.banco_milionario = []
 
+# --- ESTÉTICA PERSONALIZADA ---
 st.markdown("""
 <style>
     .main { background-color: #05070a; }
-    .card-jogo { 
-        background: #10141b; padding: 25px; border-radius: 15px; 
-        border: 1px solid #333; margin-bottom: 20px;
-    }
-    .v-codigo { color: #39d353; font-size: 2.5em; font-weight: 900; line-height: 1; }
-    .motivo-box { 
-        background: rgba(255, 255, 255, 0.05); padding: 15px; 
-        border-radius: 10px; border-left: 5px solid #f1e05a; color: #8b949e; 
-    }
-    .stButton>button { width: 100%; border-radius: 10px; font-weight: bold; }
+    .ficha-segura { border-left: 10px solid #FF69B4; background: #1a1015; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+    .ficha-mili { border-left: 10px solid #E61E25; background: #1a0d0d; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+    .v-codigo { color: #39d353; font-size: 2.5em; font-weight: 900; }
+    .explica-box { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; color: #ced4da; font-size: 0.95em; border: 1px solid #333; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- MOTOR DE DECISÃO (A IA SÓ GERA O CÓDIGO) ---
-def processar_ia(casa, fora, oc, of, modo):
-    diff = abs(oc - of)
+# --- MOTOR DE DECISÃO E EXPLICAÇÃO ---
+def processar_ia_detalhado(casa, fora, oc, of, modo):
     if modo == "segura":
-        if diff < 1.0:
-            cod, pq = "TOTAL +1.5 GOLOS", "Equilíbrio total nas odds. O mercado de golos é o único porto seguro para evitar perdas no 1x2."
-        else:
-            cod, pq = "DUPLA CHANCE", "Favoritismo claro detectado. Usamos a cobertura dupla para garantir a meta de 1.000 KZ sem sustos."
+        codigo = "MAIS 1.5 GOLOS" if abs(oc-of) < 1.2 else "DUPLA CHANCE (1X/X2)"
+        funciona = "Este código ganha se houver pelo menos 2 golos no jogo (qualquer equipa) ou se a equipa favorita não perder."
+        pq = "O Mascote Rosa prioriza o lucro constante. Escolhi este código porque ele cobre 70% dos resultados possíveis, garantindo que a sua ficha não caia por um detalhe."
+        diag = "" if "GOLOS" in codigo else ""
     else:
-        if diff > 2.0:
-            cod, pq = "HANDICAP (-1.5)", "Diferença técnica abismal. Para chegar aos 50M, este é o multiplicador ideal para o favorito."
-        else:
-            cod, pq = "AMBAS MARCAM", "Confronto direto de alta voltagem. A odd sugere que ninguém fica a zeros. Alavancagem máxima."
-    
-    return {"jogo": f"{casa} vs {fora}", "oc": oc, "of": of, "codigo": cod, "just": pq}
+        codigo = "HANDICAP (-1.5)" if oc < of else "AMBAS MARCAM & +2.5"
+        funciona = "O favorito precisa de ganhar por 2 golos de diferença OU ambas as equipas marcam e o jogo tem 3 ou mais golos."
+        pq = "Modo Milionário ativado. Aqui arriscamos para bater os 50M. Escolhi este código porque a odd de favorito está baixa, então forçamos a margem de golos para disparar o prémio."
+        diag = "" if "HANDICAP" in codigo else ""
 
-st.title("🎖️ Beto AI: Comando Manual de Elite")
-st.write(f"🕒 Operação Luanda: **{agora.strftime('%H:%M')}**")
+    return {"jogo": f"{casa} vs {fora}", "oc": oc, "of": of, "cod": codigo, "func": funciona, "pq": pq, "diag": diag}
 
-# --- ABAS DE OPERAÇÃO ---
-tab1, tab2 = st.tabs(["🛡️ FICHA SEGURA", "🏆 FICHA MILIONÁRIA"])
+st.title("🎖️ Beto AI: Gestão de Banca Manual")
+st.write(f"🕒 Luanda: **{agora.strftime('%H:%M')}**")
 
-for tab, modo, banco, cor in zip([tab1, tab2], ["segura", "milionaria"], 
-                                 [st.session_state.banco_segura, st.session_state.banco_milionario],
-                                 ["#238636", "#E61E25"]):
+tab1, tab2 = st.tabs(["🌸 FICHA SEGURA (MASCOTE ROSA)", "🔥 FICHA MILIONÁRIA (AGRESSIVA)"])
+
+# --- LÓGICA DAS ABAS ---
+for tab, modo, banco, css in zip([tab1, tab2], ["segura", "milionaria"], 
+                                  [st.session_state.banco_segura, st.session_state.banco_milionario],
+                                  ["ficha-segura", "ficha-mili"]):
     with tab:
-        # INPUT MANUAL OBRIGATÓRIO
-        st.subheader("📝 Inserir Dados do Confronto")
         with st.container():
+            st.subheader(f"📝 Comando Manual - {modo.upper()}")
             c1, c2 = st.columns(2)
-            equipa_c = c1.text_input("Equipa Casa", key=f"c_{modo}", placeholder="Ex: Qarabag")
-            equipa_f = c2.text_input("Equipa Fora", key=f"f_{modo}", placeholder="Ex: Frankfurt")
-            
-            c3, c4 = st.columns(2)
-            odd_c = c3.number_input("Odd Casa", 1.01, format="%.2f", key=f"oc_{modo}")
-            odd_f = c4.number_input("Odd Fora", 1.01, format="%.2f", key=f"of_{modo}")
+            casa = c1.text_input("Equipa Casa", key=f"c_{modo}")
+            fora = c2.text_input("Equipa Fora", key=f"f_{modo}")
+            oc = c1.number_input("Odd Casa", 1.01, key=f"oc_{modo}")
+            of = c2.number_input("Odd Fora", 1.01, key=f"of_{modo}")
             
             if st.button(f"🚀 GERAR CÓDIGO {modo.upper()}", key=f"btn_{modo}"):
-                if equipa_c and equipa_f:
-                    resultado = processar_ia(equipa_c, equipa_f, odd_c, odd_f, modo)
-                    banco.append(resultado)
+                if casa and fora:
+                    banco.append(processar_ia_detalhado(casa, fora, oc, of, modo))
                     st.rerun()
 
-        # LISTAGEM DE RESULTADOS
         st.markdown("---")
         for i, j in enumerate(banco):
             st.markdown(f"""
-            <div class="card-jogo" style="border-top: 5px solid {cor}">
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: white; font-weight: bold; font-size: 1.2em;">{j['jogo']}</span>
-                    <span style="color: #f1e05a;">🏠 {j['oc']} | ✈️ {j['of']}</span>
+            <div class="{css}">
+                <div style="display:flex; justify-content:space-between;">
+                    <b style="font-size:1.3em; color:white;">{j['jogo']}</b>
+                    <span style="color:#f1e05a;">🏠 {j['oc']} | ✈️ {j['of']}</span>
                 </div>
-                <div style="margin: 20px 0;">
-                    <small style="color: #8b949e;">CÓDIGO GERADO PELA IA:</small><br>
-                    <span class="v-codigo">{j['codigo']}</span>
+                <div style="margin: 15px 0;">
+                    <span class="v-codigo">{j['cod']}</span>
                 </div>
-                <div class="motivo-box">
-                    <b>🧠 PORQUÊ ESTA ESCOLHA?</b><br>
-                    {j['just']}
+                <div class="explica-box">
+                    <b>🧠 PORQUÊ?</b> {j['pq']}<br><br>
+                    <b>⚙️ COMO FUNCIONA?</b> {j['func']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button(f"🗑️ Remover Jogo {i+1}", key=f"del_{modo}_{i}"):
+            st.write(j['diag']) # Aqui entra a imagem da possibilidade
+            if st.button(f"🗑️ Remover {i+1}", key=f"del_{modo}_{i}"):
                 banco.pop(i); st.rerun()
 
-if st.sidebar.button("🚨 LIMPAR TODO O SISTEMA"):
+if st.sidebar.button("🚨 LIMPAR TUDO"):
     st.session_state.clear()
     st.rerun()
